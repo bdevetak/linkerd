@@ -71,15 +71,12 @@ define([
         chart.updateMetrics(dataToDisplay);
       };
 
-      metricsCollector.registerListener(metricsListener, function(metrics, treeMetrics) {
-        if (!treeMetrics) return [];
-        else {
-          var clientsToQuery = getClientsToQuery(routers, routerName);
-          var metrics = _.map(clientsToQuery, function(client) {
-            return ["rt", routerName, "dst", "id", client.label, "requests", "counter"];
-          });
-          return metrics;
-        }
+      metricsCollector.registerListener(metricsListener, function() {
+        var clientsToQuery = getClientsToQuery(routers, routerName);
+        var metrics = _.map(clientsToQuery, function(client) {
+          return ["rt", routerName, "dst", "id", client.label, "requests", "counter"];
+        });
+        return metrics;
       });
       return {
         addClients: function(clients) {
