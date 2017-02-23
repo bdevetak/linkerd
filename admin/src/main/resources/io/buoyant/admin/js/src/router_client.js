@@ -74,13 +74,15 @@ define([
           {suffix: "loadbalancer/size", label: "Load balancer pool size", isGauge: true},
           {suffix: "loadbalancer/available", label: "Load balancers available", isGauge: true}
         ], function(metric) {
-          var treeKey = ["rt", routerName, "dst", "id", clientName].concat(metric.suffix.split("/")).concat([metric.isGauge ? "gauge" : "counter"])
-          // var treeKey = ["rt", routerName, "dst", "id", clientName].concat(metric.suffix.split("/"));
+          var treeKeyRoot = ["rt", routerName, "dst", "id", clientName].concat(metric.suffix.split("/"));
+          var treeKey = treeKeyRoot.concat([metric.isGauge ? "gauge" : "counter"]);
+
         return {
           metricSuffix: metric.suffix,
           label: metric.label,
           isGauge: metric.isGauge,
           treeMetric: treeKey,
+          treeMetricRoot: treeKeyRoot,
           query: Query.clientQuery().withRouter(routerName).withClient(clientName).withMetric(metric.suffix).build()
         }
       });
@@ -116,10 +118,12 @@ define([
     }
 
     function getSummaryData(data, metricDefinitions) {
+      console.log(data);
       var summary = _.reduce(metricDefinitions, function(mem, defn) {
-        var clientData = Query.filter(defn.query, data);
+        // var clientData = Query.filter(defn.query, data);
+        var clientData = _.get(data, defn.treeMetricRoot);
         var value = _.isEmpty(clientData) ? null :
-          (defn.isGauge ? clientData[0].value : clientData[0].delta);
+          (defn.isGauge ? clientData.value : clientData.delta);
         mem[defn.metricSuffix] = {
           description: defn.label,
           value: value
@@ -189,7 +193,7 @@ define([
       }
 
       function metricsHandler(data) {
-        var summaryData = getSummaryData(data.specific, metricDefinitions);
+        var summaryData = getSummaryData(data.treeSpecific, metricDefinitions);
         var latencies = getLatencyData(client, latencyKeys, latencyLegend); // this legend is no longer used in any charts: consider removing
 
         successRateChart.updateMetrics(getSuccessRate(summaryData));

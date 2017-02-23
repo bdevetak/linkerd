@@ -78,9 +78,7 @@ define(['jQuery'], function($) {
         var specific = generateDeltaPayload(resp, defaultMetrics, prevMetrics);
 
         var metricsToGet = _.flatMap(listeners, function(l) { return l.metrics(); });
-        var treeSpecific = getTreeSpecific(metricsToGet, treeResp, treeResp);
-
-        console.log(treeSpecific);
+        var treeSpecific = getTreeSpecific(metricsToGet, treeResp, prevTreeMetrics);
 
         prevMetrics = resp;
         prevTreeMetrics = treeResp;
