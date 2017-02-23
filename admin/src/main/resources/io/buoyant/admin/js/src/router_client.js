@@ -74,10 +74,13 @@ define([
           {suffix: "loadbalancer/size", label: "Load balancer pool size", isGauge: true},
           {suffix: "loadbalancer/available", label: "Load balancers available", isGauge: true}
         ], function(metric) {
+          var treeKey = ["rt", routerName, "dst", "id", clientName].concat(metric.suffix.split("/")).concat([metric.isGauge ? "gauge" : "counter"])
+          // var treeKey = ["rt", routerName, "dst", "id", clientName].concat(metric.suffix.split("/"));
         return {
           metricSuffix: metric.suffix,
           label: metric.label,
           isGauge: metric.isGauge,
+          treeMetric: treeKey,
           query: Query.clientQuery().withRouter(routerName).withClient(clientName).withMetric(metric.suffix).build()
         }
       });
@@ -196,8 +199,9 @@ define([
       }
 
       function getDesiredMetrics(metrics) {
-        return  _.flatMap(metricDefinitions, function(d) {
-          return Query.filter(d.query, metrics);
+        return  _.map(metricDefinitions, function(d) {
+          // return Query.filter(d.query, metrics);
+          return d.treeMetric;
         });
       }
 
