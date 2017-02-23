@@ -53,7 +53,8 @@ define(['jQuery'], function($) {
     return function(initialMetrics) {
       var prevMetrics = initialMetrics;
 
-      function update(resp) {
+      function update(resp, treeResp) {
+        // console.log(treeResp);
         var defaultMetrics = _.keys(resp);
         var specific = generateDeltaPayload(resp, defaultMetrics, prevMetrics);
         prevMetrics = resp;
@@ -70,7 +71,9 @@ define(['jQuery'], function($) {
 
       return {
         start: function(interval) {
-          $.get(generalUpdateUri, update)
+          $.when($.get(generalUpdateUri), $.get(generalUpdateUri+"?tree=1")).done(function(r1, r2) {
+            update(r1[0], r2[0]);
+          });
           setInterval(function(){$.get(generalUpdateUri, update)}, interval);
         },
         getCurrentMetrics: function() { return _.keys(prevMetrics); },
