@@ -5,13 +5,11 @@ define([
   'lodash',
   'handlebars.runtime',
   'src/utils',
-  'src/query',
   'src/success_rate_graph',
   'src/bar_chart',
   'template/compiled_templates'
 ], function($, _, Handlebars,
   Utils,
-  Query,
   SuccessRateGraph,
   BarChart,
   templates
@@ -82,8 +80,7 @@ define([
           label: metric.label,
           isGauge: metric.isGauge,
           treeMetric: treeKey,
-          treeMetricRoot: treeKeyRoot,
-          query: Query.clientQuery().withRouter(routerName).withClient(clientName).withMetric(metric.suffix).build()
+          treeMetricRoot: treeKeyRoot
         }
       });
     }
@@ -118,9 +115,7 @@ define([
     }
 
     function getSummaryData(data, metricDefinitions) {
-      console.log(data);
       var summary = _.reduce(metricDefinitions, function(mem, defn) {
-        // var clientData = Query.filter(defn.query, data);
         var clientData = _.get(data, defn.treeMetricRoot);
         var value = _.isEmpty(clientData) ? null :
           (defn.isGauge ? clientData.value : clientData.delta);
@@ -204,7 +199,6 @@ define([
 
       function getDesiredMetrics(metrics) {
         return  _.map(metricDefinitions, function(d) {
-          // return Query.filter(d.query, metrics);
           return d.treeMetric;
         });
       }

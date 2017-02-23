@@ -50,19 +50,14 @@ define(['jQuery'], function($) {
 
     }
 
-    function getTreeSpecific(metricNames, resp, prevResp) {
-      // console.log(metricNames);
+    function getTreeDeltaPayload(metricNames, resp, prevResp) {
       _.each(metricNames, function(metric) {
         if(_.isArray(metric)) {
-          // console.log(metric);
           var prevValue = _.get(prevResp, metric);
           var currentValue = _.get(resp, metric);
-          // console.log(prevValue, currentValue);
           if (prevValue !== undefined && currentValue !== undefined) {
-            // console.log(metric, prevValue, currentValue);
             _.set(resp, _.take(metric, metric.length - 1).concat(["delta"]), currentValue - prevValue);
             _.set(resp, _.take(metric, metric.length - 1).concat(["value"]), currentValue);
-            // console.log(_.get(resp, _.take(metric, metric.length - 1)));
           }
         }
       });
@@ -78,7 +73,7 @@ define(['jQuery'], function($) {
         var specific = generateDeltaPayload(resp, defaultMetrics, prevMetrics);
 
         var metricsToGet = _.flatMap(listeners, function(l) { return l.metrics(); });
-        var treeSpecific = getTreeSpecific(metricsToGet, treeResp, prevTreeMetrics);
+        var treeSpecific = getTreeDeltaPayload(metricsToGet, treeResp, prevTreeMetrics);
 
         prevMetrics = resp;
         prevTreeMetrics = treeResp;
